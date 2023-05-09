@@ -26,9 +26,9 @@ impl ImageOp for Median {
         let (width, height) = in_img.dimensions();
         let mut tmp: Self::Image = Self::Image::new(width, height);
         let h_start = 0;
-        let h_end = height;
+        let h_end = height-self.mask_height;
         let w_start = 0;
-        let w_end = width;
+        let w_end = width-self.mask_width;
         for h in h_start..h_end {
             for w in w_start..w_end {
                 let patch = in_img.view(w, h, self.mask_width, self.mask_height);
@@ -41,6 +41,11 @@ impl ImageOp for Median {
                         patch_vec[(i*self.mask_width + j) as usize] = val;
                     }
                 }
+
+                patch_vec.sort();
+                let median_val = patch_vec[patch_vec.len() / 2];
+                let p = tmp.get_pixel_mut(w, h);
+                *p = Luma::<u8>::from([median_val; 1]);
             }
         }
 
