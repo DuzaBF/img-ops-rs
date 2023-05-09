@@ -8,12 +8,29 @@ fn main() {
     let subcommand = args.remove(0);
     match subcommand.as_str() {
         "median" => {
-            if args.len() != 2 {
+
+            let mut width = 3u32;
+            let mut height = 3u32;
+
+            if (args.len() != 2) && (args.len() != 4) {
                 print_usage_and_exit();
             }
+
             let infile = args.remove(0);
             let outfile = args.remove(0);
-            let median = Median::new(3, 3);
+
+            if args.len() == 2 {
+                match args.remove(0).parse::<u32>() {
+                    Ok(x) => width = x,
+                    Err(_) => print_usage_and_exit(),
+                }
+                match args.remove(0).parse::<u32>() {
+                    Ok(x) => height = x,
+                    Err(_) => print_usage_and_exit(),
+                }
+            }
+
+            let median = Median::new(width, height);
             let in_img = image::open(infile).expect("Failed to open INFILE.");
             let out_img = median.apply(&(median.convert(in_img)));
             out_img.save(outfile).expect("Failed writing OUTFILE.");
@@ -41,5 +58,5 @@ fn print_help<T: HelpStr>(_: T) {
 }
 
 impl HelpStr for Median {
-    const HELP_STR: &'static str = "median INFILE OUTFILE";
+    const HELP_STR: &'static str = "median INFILE OUTFILE [width height]";
 }
